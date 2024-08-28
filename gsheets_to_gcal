@@ -1,0 +1,40 @@
+function JordanCreateCalendarEvents() {
+  // Spreadsheet and sheet information
+  var spreadsheetId = "****";
+  var sheetName = "jordan_schedule";
+
+  // Calendar information
+  var calendarId = "****";
+  
+  // Access the Google Sheets data
+  var spreadsheet = SpreadsheetApp.openById(spreadsheetId);
+  var sheet = spreadsheet.getSheetByName(sheetName);
+  var data = sheet.getRange(2, 1, sheet.getLastRow() - 1, 7).getValues(); // Assuming data starts from row 2
+
+  // Access the Google Calendar
+  var calendar = CalendarApp.getCalendarById(calendarId);
+  
+  // Loop through the data and create events
+  for (var i = 0; i < data.length; i++) {
+    var eventStart = new Date(data[i][0]);
+    var eventEnd = new Date(data[i][1]);
+    var eventTitle = data[i][4] + ' '+ data[i][6] + ' ' + data[i][2] + ' ' + data[i][5] + ' ' + data[i][4]; // Combine titles
+    
+    // Check if the cell contains no data (empty)
+    if (eventTitle.trim() === "") {
+      Logger.log('Cell is empty. Skipping...');
+      continue; // Skip to the next iteration
+    }
+    
+    // Check if an event with the same details already exists
+    var existingEvents = calendar.getEvents(eventStart, eventEnd, {search: eventTitle});
+    
+    if (existingEvents.length === 0) {
+      // Create the calendar event
+      var event = calendar.createEvent(eventTitle, eventStart, eventEnd);
+      Logger.log('Event created: ' + eventTitle + ' from ' + eventStart + ' to ' + eventEnd);
+    } else {
+      Logger.log('Event already exists: ' + eventTitle + ' from ' + eventStart + ' to ' + eventEnd);
+    }
+  }
+}
